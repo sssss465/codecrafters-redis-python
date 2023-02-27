@@ -9,7 +9,32 @@ def main():
     # Uncomment this to pass the first stage
     #
     server_socket = socket.create_server(("localhost", 6379), reuse_port=True)
-    server_socket.accept() # wait for client
+    while True: 
+        (conn, address) = server_socket.accept() # wait for client
+        data = conn.recv(1024) # read the first line
+        cmd = data.decode().split('\r\n')
+        cur = 0
+        while cur < len(cmd):
+            ans = respond(cmd[cur])
+            if ans != -1:
+                conn.sendall(ans)
+            cur += 1
+        RESPTYPE_FIRSTBYTE = {
+            'simple': b'+',
+            'error': b'-',
+            'integer': b':',
+            'bulk': b'$',
+            'array': b'*',
+
+        }
+        
+        print(cmd)
+
+def respond(cmd):
+    if cmd == "ping": 
+        return (b"+PONG\r\n")
+    else:
+        return -1
 
 
 if __name__ == "__main__":
