@@ -15,11 +15,14 @@ def main():
             data = conn.recv(1024) # read the first line
             cmd = data.decode('unicode_escape').split('\r\n')
             cur = 0
+            ans = b"+"
             while cur < len(cmd):
-                ans = respond(cmd[cur])
-                if ans != -1:
-                    conn.sendall(ans)
+                a = respond(cmd[cur])
+                if a != -1:
+                    ans += a
                 cur += 1
+            ans += b"\r\n"
+            conn.sendall(ans)
             RESPTYPE_FIRSTBYTE = {
                 'simple': b'+',
                 'error': b'-',
@@ -37,7 +40,7 @@ def respond(cmd):
     if "ping" in cmd:
         cmd.split()
         print(bytes(cmd, 'utf-8'))
-        return (b"+PONG\r\n")
+        return (b"PONG")
     else:
         return -1
 
